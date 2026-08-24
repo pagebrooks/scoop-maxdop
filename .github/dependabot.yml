@@ -1,0 +1,8 @@
+# The workflows here pin actions to commit SHAs, which is the only pin an attacker cannot move — and
+# which never updates on its own. This is the other half of that trade.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

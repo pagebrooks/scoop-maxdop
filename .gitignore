@@ -1,0 +1,3 @@
+# Scratch from the manifest check when it is run locally rather than in CI.
+urls.txt
+archive.bin

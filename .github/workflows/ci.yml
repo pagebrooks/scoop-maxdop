@@ -1,0 +1,64 @@
+# A manifest whose hash does not match the published archive installs for nobody, and it fails at
+# `scoop install` on a stranger's machine rather than here. That is the one mistake worth catching
+# automatically, so this downloads exactly what the manifest points at and checks it.
+#
+# Deliberately not the official bucket test suite: that wants a checkout of Scoop itself, a Windows
+# runner and a bin/ directory of PowerShell helpers, to lint a bucket that contains one manifest.
+# This asks the only question that breaks users.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest:
+    name: Manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Every URL resolves and every hash matches
+        run: |
+          set -euo pipefail
+
+          for manifest in bucket/*.json; do
+            echo "::group::$manifest"
+
+            # Fails the job on malformed JSON before anything else looks at it.
+            python3 -m json.tool "$manifest" > /dev/null
+
+            python3 - "$manifest" > urls.txt <<'PY'
+          import json, sys
+          m = json.load(open(sys.argv[1]))
+          for arch, spec in m["architecture"].items():
+              print(f'{arch}\t{spec["url"]}\t{spec["hash"]}')
+          PY
+
+            while IFS=$'\t' read -r arch url want; do
+              echo "  $arch  $url"
+              curl -fsSL --retry 3 -o archive.bin "$url"
+              got="$(sha256sum archive.bin | cut -d' ' -f1)"
+
+              if [ "$got" != "$want" ]; then
+                echo "::error file=$manifest::$arch hash mismatch — manifest says $want, the download is $got"
+                exit 1
+              fi
+
+              # An archive that unpacks without the executable the manifest names is a working
+              # download and a broken install, which is the harder failure to notice.
+              exe="$(python3 -c "import json;print(json.load(open('$manifest'))['bin'])")"
+              dir="$(python3 -c "import json;print(json.load(open('$manifest'))['architecture']['$arch']['extract_dir'])")"
+              unzip -l archive.bin | grep -q "$dir/$exe" \
+                || { echo "::error file=$manifest::$dir/$exe is not in the archive"; exit 1; }
+
+              echo "  $arch  ok"
+              rm -f archive.bin
+            done < urls.txt
+
+            echo "::endgroup::"
+          done

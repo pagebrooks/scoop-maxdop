@@ -1,0 +1,35 @@
+# Keeps bucket/maxdop.json pointing at the newest maxdop release without anyone editing it.
+#
+# The manifest's `checkver` finds the latest tag and `autoupdate` rewrites the URLs; the new hashes
+# are read out of that release's SHA256SUMS rather than by downloading and hashing 19 MB of archives.
+# Scoop's own action does all of it and commits the result.
+name: Excavator
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Daily. Extras runs this every four hours because it carries thousands of manifests; this bucket
+    # has one, and maxdop does not release hourly. Cutting a release and wanting it published now is
+    # what the workflow_dispatch trigger above is for.
+    - cron: '40 5 * * *'
+
+permissions:
+  # The whole point: this workflow commits the updated manifest back to the bucket.
+  contents: write
+
+jobs:
+  excavate:
+    name: Excavate
+    # Not a preference. The action installs Scoop, which is a Windows package manager.
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Excavate
+        uses: ScoopInstaller/GithubActions@5bceeda181721d9d10a18fdcc3ddca6f33467ae6 # main @ 2026-08
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Say nothing about manifests that were already current, so a run that changed nothing
+          # reads as silence rather than as output worth checking.
+          SKIP_UPDATED: '1'
