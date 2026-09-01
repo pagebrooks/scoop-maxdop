@@ -1,18 +1,18 @@
 {
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "An opinionated T-SQL formatter built on Microsoft's own parser. Runs in CI, understands the whole language, and verifies every format against your original before writing it.",
     "homepage": "https://github.com/pagebrooks/maxdop",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/pagebrooks/maxdop/releases/download/v0.1.1/maxdop-0.1.1-win-x64.zip",
-            "hash": "608c310656994cfe46a0bf2bbe38cbadb392d81fca1996017df150e9495e6219",
-            "extract_dir": "maxdop-0.1.1-win-x64"
+            "url": "https://github.com/pagebrooks/maxdop/releases/download/v0.1.2/maxdop-0.1.2-win-x64.zip",
+            "hash": "55f43288ad3fe0bdb9f354bd6ae3a047b77a0ae87061c927ea6affaf89925891",
+            "extract_dir": "maxdop-0.1.2-win-x64"
         },
         "arm64": {
-            "url": "https://github.com/pagebrooks/maxdop/releases/download/v0.1.1/maxdop-0.1.1-win-arm64.zip",
-            "hash": "024c5da0843b8ae09cab5691de2948edb651e745d5909d15114df763b7174484",
-            "extract_dir": "maxdop-0.1.1-win-arm64"
+            "url": "https://github.com/pagebrooks/maxdop/releases/download/v0.1.2/maxdop-0.1.2-win-arm64.zip",
+            "hash": "df00864615ea93c6bdb134d5dbbd4d597dff092bc0cd32e53b7462be730d5f13",
+            "extract_dir": "maxdop-0.1.2-win-arm64"
         }
     },
     "bin": "maxdop.exe",
